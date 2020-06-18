@@ -3,3 +3,14 @@
 ################################################################################
 
 /.vs
+/ConfigurationClasses/bin
+/ConfigurationClasses/obj
+/packages
+/SampleConfigApp/bin/Debug
+/SampleConfigApp/obj
+/SampleConfigProgram/bin/Debug
+/SampleConfigProgram/obj
+/SampleWebsite/bin
+/SampleWebsite/obj
+/WebConfiguratorLibrary/bin
+/WebConfiguratorLibrary/obj
