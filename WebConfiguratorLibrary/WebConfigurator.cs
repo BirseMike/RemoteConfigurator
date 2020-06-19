@@ -32,8 +32,6 @@ namespace WebConfigurationLibrary
             Configuration config = WebConfigurationManager.OpenMappedWebConfiguration(wcfm, "/","SampleWebsite");
 
             KeyValueConfigurationCollection settings = config.AppSettings.Settings;
-            settings.Add("location", AssemblyPath);
-            settings.Add("settingsfile", config.AppSettings.File);
             return settings;
         }
 
@@ -48,6 +46,7 @@ namespace WebConfigurationLibrary
 
         private static void SerializeObject<T>(T obj, Stream output)
         {
+            output.SetLength(0);
             var serializer = new XmlSerializer(typeof(T));
 
             XmlWriterSettings settings = new XmlWriterSettings
@@ -75,9 +74,7 @@ namespace WebConfigurationLibrary
 
         public bool SetAppValue(string key, string value)
         {
-            var filepath = Directory.GetParent(AssemblyPath) + @"\AppSettings.config";
-            var orgAppSettings = File.ReadAllText(filepath);
-
+            var filepath = Directory.GetParent(Directory.GetParent(AssemblyPath).ToString()) + @"\AppSettings.config";
             
             using (FileStream fs = new FileStream(filepath, FileMode.OpenOrCreate, FileAccess.ReadWrite))
             {

@@ -17,18 +17,8 @@ namespace SampleConfigProgram
         public MainWindow()
         {
             InitializeComponent();
-        }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
             var configurator = GetConfiguration();
-            var appSettings = configurator.GetAppSettings();
-
-
-            text_config_keys.Text = string.Join(",", appSettings.AllKeys);
-
-            text_config_values.Text = string.Join(",", appSettings.AllKeys.Select(k => appSettings[k].Value));
-
+            LoadData();
         }
 
         private static IConfigurator GetConfiguration()
@@ -44,7 +34,7 @@ namespace SampleConfigProgram
             else
             {
                 //Website
-                path = @"C:\Users\mike_\source\repos\RemoteConfigurator\SampleWebsite\bin\";
+                path = @"C:\Users\mike_\source\repos\RemoteConfigurator\SampleWebsite\bin";
             }
 
             var fileList = Directory.GetFiles(path, "*.*").Where(s => s.EndsWith(".dll") || s.EndsWith(".exe"));
@@ -76,15 +66,29 @@ namespace SampleConfigProgram
             return Activator.CreateInstance(firstType) as IConfigurator;
         }
 
-        private void Button_Click_1(object sender, RoutedEventArgs e)
+        private void LoadData()
+        {
+            var configurator = GetConfiguration();
+            DataContext = new
+            {
+                Files = new string[] { "WebFile" },
+                Settings = configurator.GetAppSettings()
+            };
+        }
+
+        private void ListBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+
+        }
+
+        private void change_Click(object sender, RoutedEventArgs e)
         {
             var configurator = GetConfiguration();
             var appSettings = configurator.GetAppSettings();
 
             var key = appSettings.AllKeys.Last();
             configurator.SetAppValue(key, $"Setting Value updated @ {DateTime.Now}");
-            Button_Click(sender, e);
-
+            LoadData();
         }
     }
 }

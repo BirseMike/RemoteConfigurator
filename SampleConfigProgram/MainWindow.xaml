@@ -6,19 +6,21 @@
         xmlns:local="clr-namespace:SampleConfigProgram"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid ShowGridLines="True" Margin="0,4,0,-3.5">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="100"></ColumnDefinition>
-            <ColumnDefinition Width="600"></ColumnDefinition>
-            <ColumnDefinition Width="10"></ColumnDefinition>
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="auto"></RowDefinition>
-            <RowDefinition Height="auto"></RowDefinition>
-        </Grid.RowDefinitions>
-        <Button Uid="button1" Content="Load Configs" FontSize="16" Grid.Row="0" Grid.Column="0" Click="Button_Click" Margin="0,0,0.5,0" Height="26" VerticalAlignment="Top"/>
-        <Button Content="Row0 column1" FontSize="16" Grid.Row="0" Grid.Column="1" Click="Button_Click_1"></Button>
-        <TextBox x:Name="text_config_keys" HorizontalAlignment="Left" Margin="72,131,0,-129" Grid.Column="0" Grid.Row="1" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top"/>
-        <TextBox x:Name="text_config_values" HorizontalAlignment="Left" Margin="72,131,0,-129" Grid.Column="1" Grid.Row="1" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top"/>
+    <Grid VerticalAlignment = "Top">
+        <ComboBox Name = "Projects" ItemsSource = "{Binding Files}" Height = "30" Width = "400">
+        </ComboBox>
+        <ListBox ItemsSource = "{Binding Settings}" HorizontalAlignment="Left" Height="252" Margin="44,96,0,-318" VerticalAlignment="Top" Width="666">
+            <ListBox.ItemTemplate>
+            <DataTemplate>
+                <StackPanel Orientation = "Horizontal" Margin = "2">
+                    <TextBlock Text = "Key: " Width = "95" Background = "Aqua" Margin = "2" />
+                    <TextBlock Text = "{Binding Key}" Width = "95" Background = "AliceBlue" Margin = "2" />
+                    <TextBlock Text = "Value: " Width = "95" Background = "Aqua" Margin = "10,2,0,2" />
+                    <TextBlock Text = "{Binding Value}" Width = "400" Background = "AliceBlue" Margin = "2" />
+                </StackPanel>
+            </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <Button Name="change" Click="change_Click" >Update</Button>
     </Grid>
 </Window>
