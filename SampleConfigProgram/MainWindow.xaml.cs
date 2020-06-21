@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -14,65 +15,71 @@ namespace SampleConfigProgram
     /// </summary>
     public partial class MainWindow : Window
     {
+        private Dictionary<string, Assembly> _configurators = new Dictionary<string, Assembly>();
+        private IConfigurator _currentConfigurator;
+
         public MainWindow()
         {
             InitializeComponent();
-            var configurator = GetConfiguration();
+            LoadConfigurators();
             LoadData();
+            Projects.SelectedIndex = 0;
         }
 
-        private static IConfigurator GetConfiguration()
+        private void LoadConfiguration(string assembly_name)
         {
-            List<Assembly> allAssemblies = new List<Assembly>();
-            string path = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-           
-            if (false)
+            _currentConfigurator = null;
+            if (assembly_name!=null)
             {
-                //Desktop App
-                path = @"C:\Users\mike_\source\repos\RemoteConfigurator\SampleConfigApp\bin\Debug";
-            }
-            else
-            {
-                //Website
-                path = @"C:\Users\mike_\source\repos\RemoteConfigurator\SampleWebsite\bin";
-            }
+                var assembly = _configurators[assembly_name];
 
-            var fileList = Directory.GetFiles(path, "*.*").Where(s => s.EndsWith(".dll") || s.EndsWith(".exe"));
+                var firstType = assembly.GetTypes().First(t => typeof(IConfigurator).IsAssignableFrom(t));
+
+                _currentConfigurator = Activator.CreateInstance(firstType) as IConfigurator; 
+            }
+        }
+
+        private void LoadConfigurators()
+        {
+            string path = @"C:\Users\mike_\source\repos\RemoteConfigurator\";
+
+            var fileList = Directory.EnumerateFiles(path, "*.*", SearchOption.AllDirectories)
+                .Where(s => {
+                    var fname = Path.GetFileName(s);
+                    return s.Contains(@"\bin\") && (fname.StartsWith("Sample")|| fname.StartsWith("Web")) && (fname.EndsWith("dll") || fname.EndsWith("exe"));
+                    });
+
+            _configurators.Clear();
+
             foreach (string dll in fileList)
-                allAssemblies.Add(Assembly.LoadFile(dll));
-
-
-            var type = typeof(IConfigurator);
-
-            var types = allAssemblies
-                .SelectMany(s =>
+            {
+                try
                 {
+                    var assembly = Assembly.LoadFile(dll);
                     try
                     {
-                        Console.WriteLine(s.FullName);
-                        return s.GetTypes();
+                        if (assembly.GetTypes().Any(t => typeof(IConfigurator).IsAssignableFrom(t)))
+                        {
+                            _configurators[assembly.CodeBase] = assembly;
+                        }
                     }
-                    catch
+                    catch(Exception)
                     {
-                        return new Type[0];
+
                     }
-                })
-                .Where(p => type.IsAssignableFrom(p));
-
-            var assemblies = allAssemblies.Where(s => s.GetTypes().Any(t => types.Contains(t)));
-            var typelist = types.ToList();
-            var firstType = types.First();
-
-            return Activator.CreateInstance(firstType) as IConfigurator;
+                }
+                catch (Exception)
+                {
+                }
+            }
         }
 
         private void LoadData()
         {
-            var configurator = GetConfiguration();
             DataContext = new
             {
-                Files = new string[] { "WebFile" },
-                Settings = configurator.GetAppSettings()
+                Files = _configurators.Select(a => a.Value.CodeBase),
+                Settings = _currentConfigurator?.GetAppSettings()
             };
         }
 
@@ -83,11 +90,15 @@ namespace SampleConfigProgram
 
         private void change_Click(object sender, RoutedEventArgs e)
         {
-            var configurator = GetConfiguration();
-            var appSettings = configurator.GetAppSettings();
+            var key = _currentConfigurator.GetAppSettings().AllKeys.Last();
+            _currentConfigurator.SetAppValue(key, $"Setting Value updated @ {DateTime.Now}");
+            LoadData();
+        }
 
-            var key = appSettings.AllKeys.Last();
-            configurator.SetAppValue(key, $"Setting Value updated @ {DateTime.Now}");
+        private void Projects_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            var assembly_name = Projects.SelectedValue?.ToString();
+            LoadConfiguration(assembly_name);
             LoadData();
         }
     }

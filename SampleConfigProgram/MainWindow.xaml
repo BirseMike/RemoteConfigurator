@@ -7,7 +7,8 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid VerticalAlignment = "Top">
-        <ComboBox Name = "Projects" ItemsSource = "{Binding Files}" Height = "30" Width = "400">
+        <StackPanel>
+        <ComboBox Name = "Projects" ItemsSource = "{Binding Files}" Height = "30" Width = "400" SelectionChanged="Projects_SelectionChanged">
         </ComboBox>
         <ListBox ItemsSource = "{Binding Settings}" HorizontalAlignment="Left" Height="252" Margin="44,96,0,-318" VerticalAlignment="Top" Width="666">
             <ListBox.ItemTemplate>
@@ -22,5 +23,6 @@
             </ListBox.ItemTemplate>
         </ListBox>
         <Button Name="change" Click="change_Click" >Update</Button>
+        </StackPanel>
     </Grid>
 </Window>

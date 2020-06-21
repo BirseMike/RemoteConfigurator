@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Configuration;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Web.Configuration;
-using System.Xml;
-using System.Xml.Serialization;
 using ConfigurationClasses;
 
 namespace WebConfigurationLibrary
@@ -44,65 +40,12 @@ namespace WebConfigurationLibrary
             return wcfm;
         }
 
-        private static void SerializeObject<T>(T obj, Stream output)
-        {
-            output.SetLength(0);
-            var serializer = new XmlSerializer(typeof(T));
-
-            XmlWriterSettings settings = new XmlWriterSettings
-            {
-                Indent = true,
-                NewLineHandling = NewLineHandling.Entitize,
-                OmitXmlDeclaration = true
-            };
-
-            XmlSerializerNamespaces ns = new XmlSerializerNamespaces();
-            ns.Add("", "");
-
-                using (XmlWriter xmlWriter = XmlWriter.Create(output, settings))
-                {
-                    serializer.Serialize(xmlWriter, obj, ns);
-                }
-        }
-
-        public static T DeserializeObject<T>(Stream stream)
-        {
-            var serializer = new XmlSerializer(typeof(T));
-            var obj = (T)serializer.Deserialize(stream);
-            return obj;
-        }
-
         public bool SetAppValue(string key, string value)
         {
-            var filepath = Directory.GetParent(Directory.GetParent(AssemblyPath).ToString()) + @"\AppSettings.config";
-            
-            using (FileStream fs = new FileStream(filepath, FileMode.OpenOrCreate, FileAccess.ReadWrite))
-            {
-                var appSettings = DeserializeObject<AppSettings>(fs);
-                fs.Seek(0, SeekOrigin.Begin);
-
-                var keyValue = appSettings.Settings.FirstOrDefault(k => k.Key == key);
-                if (keyValue == null)
-                {
-                   appSettings.Settings.Add(new KeyValue { Key = key, Value = value });
-                }
-                else
-                {
-                    keyValue.Value = value;
-                }
-
-                    SerializeObject(appSettings,fs);
-
-            }
-            // Get the Web application configuration object.
-         //   Configuration config = WebConfigurationManager.OpenMappedWebConfiguration(wcfm, "/");
-            //config.AppSettings.File = "AppSettings.config";
-            //config.AppSettings.Settings[key].Value = value;
-            //config.Save(ConfigurationSaveMode.Modified);
-
+            var filepath = Directory.GetParent(Path.GetDirectoryName(AssemblyPath)) + @"\AppSettings.config";
+            Console.WriteLine(filepath);
+            AppSettingWriter.SaveSettings(filepath, new KeyValue { Key = key, Value = value });
             return true;
-        
-
         }
     }
 }

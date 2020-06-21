@@ -22,28 +22,15 @@ namespace SampleConfigApp
         public KeyValueConfigurationCollection GetAppSettings()
         {
             var config = ConfigurationManager.OpenExeConfiguration(AssemblyPath);
-            config.AppSettings.SectionInformation.AllowOverride = true;
-            config.AppSettings.SectionInformation.ConfigSource = "AppSettings.config";
-
-            //ExeConfigurationFileMap configFileMap =
-            //    new ExeConfigurationFileMap();
-            //configFileMap.ExeConfigFilename = AssemblyPath + ".config";
-
-            //// Get the mapped configuration file
-            //var config =
-            //   ConfigurationManager.OpenMappedExeConfiguration(
-            //     configFileMap, ConfigurationUserLevel.None);
-
             return config.AppSettings.Settings;
         }
 
 
         public bool SetAppValue(string key, string value)
         {
-            var config = ConfigurationManager.OpenExeConfiguration(AssemblyPath);
-            config.AppSettings.SectionInformation.ConfigSource = "AppSettings.config";
-            config.AppSettings.Settings[key].Value = value;
-            config.Save(ConfigurationSaveMode.Modified);
+            var directory = Path.GetDirectoryName(AssemblyPath);
+            var filepath = directory + @"\AppSettings.config";
+            AppSettingWriter.SaveSettings(filepath, new KeyValue { Key = key, Value = value });
             return true;
         }
     }
