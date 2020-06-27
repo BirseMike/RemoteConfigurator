@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Configuration;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -17,6 +19,25 @@ namespace SampleConfigProgram
     {
         private Dictionary<string, Assembly> _configurators = new Dictionary<string, Assembly>();
         private IConfigurator _currentConfigurator;
+        private DataTable _currentSettings;
+
+        private class SettingView : IEditableObject
+        {
+            public void BeginEdit()
+            {
+                throw new NotImplementedException();
+            }
+
+            public void CancelEdit()
+            {
+                throw new NotImplementedException();
+            }
+
+            public void EndEdit()
+            {
+                throw new NotImplementedException();
+            }
+        }
 
         public MainWindow()
         {
@@ -39,6 +60,7 @@ namespace SampleConfigProgram
             }
         }
 
+        
         private void LoadConfigurators()
         {
             string path = @"C:\Users\mike_\source\repos\RemoteConfigurator\";
@@ -76,22 +98,46 @@ namespace SampleConfigProgram
 
         private void LoadData()
         {
+            var settings = _currentConfigurator?.GetAppSettings();
+
+            _currentSettings = new DataTable();
+            _currentSettings.Columns.AddRange(
+                new[]
+                {
+                    new DataColumn("Key", typeof(string)),
+                    new DataColumn("Value", typeof(string))
+                }
+            );
+            var settingKeys = settings?.AllKeys ?? new string[] { };
+
+            foreach( var keyName in settingKeys)
+            {
+                _currentSettings.Rows.Add(keyName, settings[keyName].Value);
+            }
+
             DataContext = new
             {
                 Files = _configurators.Select(a => a.Value.CodeBase),
-                Settings = _currentConfigurator?.GetAppSettings()
+                Settings = _currentSettings
             };
-        }
-
-        private void ListBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
-        {
-
         }
 
         private void change_Click(object sender, RoutedEventArgs e)
         {
-            var key = _currentConfigurator.GetAppSettings().AllKeys.Last();
-            _currentConfigurator.SetAppValue(key, $"Setting Value updated @ {DateTime.Now}");
+            var settings = _currentConfigurator.GetAppSettings();
+
+            foreach (DataRow row in _currentSettings.Rows)
+            {
+                var key = row[0].ToString();
+                var value = row[1].ToString();
+                var originalValue = settings[key].Value;
+
+                if (originalValue!= value)
+                {
+                    _currentConfigurator.SetAppValue(key, value);
+                }
+
+            }
             LoadData();
         }
 

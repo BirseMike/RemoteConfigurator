@@ -10,18 +10,7 @@
         <StackPanel>
         <ComboBox Name = "Projects" ItemsSource = "{Binding Files}" Height = "30" Width = "400" SelectionChanged="Projects_SelectionChanged">
         </ComboBox>
-        <ListBox ItemsSource = "{Binding Settings}" HorizontalAlignment="Left" Height="252" Margin="44,96,0,-318" VerticalAlignment="Top" Width="666">
-            <ListBox.ItemTemplate>
-            <DataTemplate>
-                <StackPanel Orientation = "Horizontal" Margin = "2">
-                    <TextBlock Text = "Key: " Width = "95" Background = "Aqua" Margin = "2" />
-                    <TextBlock Text = "{Binding Key}" Width = "95" Background = "AliceBlue" Margin = "2" />
-                    <TextBlock Text = "Value: " Width = "95" Background = "Aqua" Margin = "10,2,0,2" />
-                    <TextBlock Text = "{Binding Value}" Width = "400" Background = "AliceBlue" Margin = "2" />
-                </StackPanel>
-            </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+            <DataGrid ItemsSource = "{Binding Settings}" Height="252" SelectionMode="Single" SelectionUnit="Cell"> </DataGrid>
         <Button Name="change" Click="change_Click" >Update</Button>
         </StackPanel>
     </Grid>
